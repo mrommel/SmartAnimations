@@ -1,0 +1,81 @@
+{% extends "includes/base.html" %}
+
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Recent Animations</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="box-body">
+                <div class="table-responsive">
+                    <table class="table no-margin">
+                        <thead>
+                            <tr>
+                                <th>Animation ID</th>
+                                <th>Name</th>
+                                <th>Dimensions</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for animation in animations %}
+                                <tr>
+                                    <td>{{ animation.id }}</td>
+                                    <td><a href="/animations/animation/{{ animation.id }}/">{{ animation.name }}</a></td>
+                                    <td>{{ animation.width }}x{{ animation.height }}</td>
+                                    <td>
+                                        {% if animation.valid %}
+                                            <span class="label label-success">Valid</span>
+                                        {% else %}
+                                            <span class="label label-danger">Invalid</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="box-footer clearfix">
+                <a href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right">View All Orders</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Create new Animation</h3>
+            </div>
+
+            <form role="form" method='POST' action="/animations/home">
+                <div class="box-body">
+                    {% csrf_token %}
+                    {{ form.media }}
+                    {{ form|crispy }}
+                </div>
+
+                <div class="box-footer">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
