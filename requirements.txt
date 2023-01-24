@@ -4,3 +4,4 @@ django-colorfield==0.8.0
 django-crispy-forms==1.14.0
 
 pylint==2.15.10
+pytest==7.2.1
