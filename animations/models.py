@@ -41,6 +41,14 @@ class ObjectType(TextChoices):
 	RECTANGLE = 'RE', _('Rectangle')
 
 
+class ObjectState:
+	def __init__(self, x, y, width, height):
+		self.x = x
+		self.y = y
+		self.width = width
+		self.height = height
+
+
 class ObjectModel(Model):
 	name = CharField(max_length=100, help_text="Enter a name of the object", )
 	animation = ForeignKey(AnimationModel, on_delete=CASCADE)
@@ -56,6 +64,26 @@ class ObjectModel(Model):
 	width = IntegerField(blank=True, null=True)
 	height = IntegerField(blank=True, null=True)
 	color = ColorField(default='#FFFFFF')
+
+	def stateIn(self, start, frame_id):
+		state = ObjectState(self.x_coord, self.y_coord, self.width, self.height)
+
+		for index in range(start, frame_id):
+			for ani in ObjectAnimationModel.objects.filter(object=self):
+				if ani.start <= index <= ani.end:
+					if ani.type == AnimationType.MOVE:
+						state.x += ani.deltaX()
+						state.y += ani.deltaY()
+					elif ani.type == AnimationType.SCALE:
+						ds = 1.0 + ani.deltaScale()
+						dw = state.width * ds
+						dh = state.height * ds
+						state.x -= dw / 2
+						state.y -= dw / 2
+						state.width += dw
+						state.height += dh
+
+		return state
 
 	class Meta:
 		constraints = [
@@ -89,6 +117,18 @@ class ObjectAnimationModel(Model):
 
 	def type_name(self):
 		return AnimationType(self.type).label
+
+	def deltaX(self) -> float:
+		dt = self.end - self.start
+		return self.dx / dt
+
+	def deltaY(self) -> float:
+		dt = self.end - self.start
+		return self.dy / dt
+
+	def deltaScale(self) -> float:
+		dt = self.end - self.start
+		return self.scale / dt
 
 	class Meta:
 		constraints = [
