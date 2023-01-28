@@ -3,7 +3,8 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.template import loader
 
 from animations.forms import NewAnimationForm
-from animations.models import AnimationModel, ObjectModel, ObjectAnimationModel
+from animations.models import AnimationModel, ObjectModel, ObjectAnimationModel, ObjectType
+from smartanimations.settings import BASE_DIR
 
 
 def index(request):
@@ -56,7 +57,19 @@ def render_animation(request, animation_id, frame_id):
 
 	for obj in ObjectModel.objects.filter(animation=animation_model):
 		state = obj.stateIn(animation_model.start, frame_id)
-		draw.rectangle((state.x, state.y, state.x + state.width, state.y + state.height), outline='teal', fill=f'{obj.color}', width=0)
+		if obj.type == ObjectType.RECTANGLE:
+			draw.rectangle((state.x, state.y, state.x + state.width, state.y + state.height), outline='teal', fill=f'{obj.color}', width=0)
+		elif obj.type == ObjectType.IMAGE:
+			# print(f'base: {BASE_DIR}')
+			# print(f'image: {obj.image}')
+			image_path = obj.full_path()
+			im2 = Image.open(image_path)
+			size = (int(state.width), int(state.height))
+			im2 = im2.resize(size, Image.Resampling.LANCZOS)
+			area = (int(state.x), int(state.y))  # , state.x + state.width, state.y + state.height)
+			img.paste(im2, area)
+		else:
+			raise AttributeError(f'unsupported type: {obj.type}')
 
 	response = HttpResponse(content_type="image/png")
 	img.save(response, "PNG")

@@ -5,10 +5,35 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-6">
         <div class="box box-primary">
             <div class="box-header with-border">
                 <h3 class="box-title">{{ animation.name }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Player</h3>
+            </div>
+            <div class="box-body no-padding">
+                <img src="/animations/render/{{ animation.id }}/0" class="player" id="animation_player" />
+            </div>
+            <div class="box-footer text-center">
+                <a href="javascript:previous_image()" class="uppercase">Previous</a>
+                <a href="javascript:play()" class="uppercase" id="animation_btn">Play</a>
+                <a href="javascript:next_image()" class="uppercase">Next</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Thumbnails</h3>
             </div>
 
             <div class="box-body">
@@ -31,4 +56,46 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    var image_index = 0;
+    var image_urls = [
+            {% for index in animation.timeline %}
+                '/animations/render/{{ animation.id }}/{{ index }}',
+            {% endfor %}
+        ];
+
+    function prevImage() {
+        image_index--;
+        image_index = image_index < 0 ? 0 : image_index;
+        return image_urls[image_index];
+    }
+
+    function nextImage() {
+        image_index++;
+        image_index = image_index >= image_urls.length ? image_urls.length - 1 : image_index;
+        return image_urls[image_index];
+    }
+
+    function play() {
+        if (image_index + 1 < image_urls.length) {
+            next_image();
+            setTimeout(play, 1000);
+        }
+    }
+
+    function previous_image() {
+        const previous_image_url = prevImage();
+        $("#animation_player").attr("src", previous_image_url);
+        // console.log('previous: ' + previous_image_url + ' ' + $('#animation_player'));
+    }
+
+    function next_image() {
+        const next_image_url = nextImage();
+        $("#animation_player").attr("src", next_image_url);
+        // console.log('next: ' + next_image_url + ' ' + $('#animation_player'));
+    }
+</script>
 {% endblock %}

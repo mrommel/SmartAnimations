@@ -3,6 +3,8 @@ from django.db.models import CheckConstraint, Q, Model, IntegerField, CharField,
 	ImageField, FloatField
 from django.utils.translation import gettext_lazy as _
 
+from smartanimations.settings import BASE_DIR
+
 
 class AnimationModel(Model):
 	name = CharField(max_length=100, help_text="Enter a name of the animation", )
@@ -65,8 +67,13 @@ class ObjectModel(Model):
 	height = IntegerField(blank=True, null=True)
 	color = ColorField(default='#FFFFFF')
 
+	def full_path(self):
+		return f'{BASE_DIR}/animations/{self.image}'
+
 	def stateIn(self, start, frame_id):
 		state = ObjectState(self.x_coord, self.y_coord, self.width, self.height)
+		canvas_width = self.animation.width
+		canvas_height = self.animation.height
 
 		for index in range(start, frame_id):
 			for ani in ObjectAnimationModel.objects.filter(object=self):
@@ -78,10 +85,10 @@ class ObjectModel(Model):
 						ds = 1.0 + ani.deltaScale()
 						dw = state.width * ds
 						dh = state.height * ds
-						state.x -= dw / 2
-						state.y -= dw / 2
-						state.width += dw
-						state.height += dh
+						state.x = (canvas_width - dw) / 2
+						state.y = (canvas_height - dh) / 2
+						state.width = dw
+						state.height = dh
 
 		return state
 
