@@ -1,3 +1,4 @@
+from PIL import ImageDraw, Image
 from colorfield.fields import ColorField
 from django.db.models import CheckConstraint, Q, Model, IntegerField, CharField, TextChoices, ForeignKey, CASCADE, \
 	ImageField, FloatField
@@ -32,6 +33,34 @@ class AnimationModel(Model):
 
 	def timeline(self):
 		return list(range(self.start, self.end + 1))
+
+	def frame_image(self, frame_id):
+		img = Image.new('RGBA', (self.width, self.height), (255, 0, 0, 0))
+
+		draw = ImageDraw.Draw(img)
+
+		for obj in ObjectModel.objects.filter(animation=self):
+			state = obj.stateIn(self.start, frame_id)
+			if obj.type == ObjectType.RECTANGLE:
+				draw.rectangle(
+					(state.x, state.y, state.x + state.width, state.y + state.height),
+					outline='teal',
+					fill=f'{obj.color}',
+					width=0
+				)
+			elif obj.type == ObjectType.IMAGE:
+				# print(f'base: {BASE_DIR}')
+				# print(f'image: {obj.image}')
+				image_path = obj.full_path()
+				im2 = Image.open(image_path)
+				size = (int(state.width), int(state.height))
+				im2 = im2.resize(size, Image.Resampling.LANCZOS)
+				area = (int(state.x), int(state.y))  # , state.x + state.width, state.y + state.height)
+				img.paste(im2, area)
+			else:
+				raise AttributeError(f'unsupported type: {obj.type}')
+
+		return img
 
 	def __str__(self):
 		return self.name

@@ -13,7 +13,7 @@ class AnimationModelAdmin(admin.ModelAdmin):
 	list_display = ('name', 'render_animation_link', )
 
 	def render_animation_link(self, obj):
-		return mark_safe('<a href="/animations/render/%s/">Render</a>' % obj.id)
+		return mark_safe('<a href="/animations/export/%s/gif">Export GIF</a>' % obj.id)
 
 	render_animation_link.allow_tags = True
 

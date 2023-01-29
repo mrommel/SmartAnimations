@@ -1,10 +1,13 @@
-from PIL import ImageDraw, Image
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+import io
+import os
+import uuid
+
+import imageio
+from django.http import HttpResponse, Http404, HttpResponseRedirect, FileResponse
 from django.template import loader
 
 from animations.forms import NewAnimationForm
-from animations.models import AnimationModel, ObjectModel, ObjectAnimationModel, ObjectType
-from smartanimations.settings import BASE_DIR
+from animations.models import AnimationModel
 
 
 def index(request):
@@ -51,27 +54,38 @@ def render_animation(request, animation_id, frame_id):
 	if not animation_model.start <= frame_id <= animation_model.end:
 		return HttpResponse(f'{frame_id} must be within [{animation_model.start}-{animation_model.end}]', status=400)
 
-	img = Image.new('RGBA', (animation_model.width, animation_model.height), (255, 0, 0, 0))
-
-	draw = ImageDraw.Draw(img)
-
-	for obj in ObjectModel.objects.filter(animation=animation_model):
-		state = obj.stateIn(animation_model.start, frame_id)
-		if obj.type == ObjectType.RECTANGLE:
-			draw.rectangle((state.x, state.y, state.x + state.width, state.y + state.height), outline='teal', fill=f'{obj.color}', width=0)
-		elif obj.type == ObjectType.IMAGE:
-			# print(f'base: {BASE_DIR}')
-			# print(f'image: {obj.image}')
-			image_path = obj.full_path()
-			im2 = Image.open(image_path)
-			size = (int(state.width), int(state.height))
-			im2 = im2.resize(size, Image.Resampling.LANCZOS)
-			area = (int(state.x), int(state.y))  # , state.x + state.width, state.y + state.height)
-			img.paste(im2, area)
-		else:
-			raise AttributeError(f'unsupported type: {obj.type}')
+	img = animation_model.frame_image(frame_id)
 
 	response = HttpResponse(content_type="image/png")
 	img.save(response, "PNG")
 	return response
 
+
+def export_animation_gif(request, animation_id):
+	try:
+		animation_model = AnimationModel.objects.get(pk=animation_id)
+	except AnimationModel.DoesNotExist:
+		raise Http404("Animation does not exist")
+
+	images = []
+
+	for frame_id in range(animation_model.start, animation_model.end):
+		img = animation_model.frame_image(frame_id)
+		images.append(img)
+
+	buffer = io.BytesIO()
+	imageio.mimwrite(buffer, images)
+
+	tmp_out = f'out-{uuid.UUID}.gif'
+
+	# output
+	buffer.seek(0)
+	imageio.mimwrite(tmp_out, images)
+
+	img = open(tmp_out, 'rb')
+	response = FileResponse(img, content_type="image/gif")
+
+	# cleanup
+	os.remove(tmp_out)
+
+	return response
