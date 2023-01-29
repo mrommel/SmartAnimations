@@ -19,7 +19,7 @@ pylint: venv
 #	./$(VENV)/bin/python3 -m unittest
 
 tests: venv
-	./$(VENV)/bin/pytest -q animations/tests.py
+	./$(VENV)/bin/pytest -q tests/tests.py tests/test_animation.py
 
 run: venv
 	./$(VENV)/bin/python3 manage.py runserver 8090

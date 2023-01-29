@@ -29,7 +29,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Test with pytest
         run: |
-          pytest -q animations/tests.py  --cov
+          pytest -q tests/tests.py tests/test_animation.py  --cov
       - name: Creating coverage folder
         run: |
           mkdir -p coverage

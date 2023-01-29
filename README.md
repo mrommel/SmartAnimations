@@ -1,7 +1,7 @@
 # Smart Animations
 
 ![pytest workflow](https://github.com/mrommel/SmartAnimations/workflows/pytesting/badge.svg)
-![coverage workflow](https://raw.githubusercontent.com/mrommel/SmartAnimations/main/coverage.svg?raw=true)
+![coverage workflow](https://raw.githubusercontent.com/mrommel/SmartAnimations/gh-pages/coverage.svg?raw=true)
 
 Project that ...
 
