@@ -30,7 +30,7 @@ clean:
 
 makemigrations: venv
 	./$(VENV)/bin/python3 manage.py makemigrations
-	./$(VENV)/bin/python3 manage.py sqlmigrate animations 0002  # change this
+	./$(VENV)/bin/python3 manage.py sqlmigrate animations 0003  # change this
 	./$(VENV)/bin/python3 manage.py migrate
 
 migrate: venv

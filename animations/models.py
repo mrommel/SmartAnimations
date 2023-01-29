@@ -1,7 +1,7 @@
 from PIL import ImageDraw, Image
 from colorfield.fields import ColorField
 from django.db.models import CheckConstraint, Q, Model, IntegerField, CharField, TextChoices, ForeignKey, CASCADE, \
-	ImageField, FloatField
+	ImageField, FloatField, BooleanField
 from django.utils.translation import gettext_lazy as _
 
 from smartanimations.settings import BASE_DIR
@@ -41,6 +41,10 @@ class AnimationModel(Model):
 
 		for obj in ObjectModel.objects.filter(animation=self):
 			state = obj.stateIn(self.start, frame_id)
+
+			if not state.active:
+				continue
+
 			if obj.type == ObjectType.RECTANGLE:
 				draw.rectangle(
 					(state.x, state.y, state.x + state.width, state.y + state.height),
@@ -58,7 +62,7 @@ class AnimationModel(Model):
 				area = (int(state.x), int(state.y))  # , state.x + state.width, state.y + state.height)
 				img.paste(im2, area)
 			else:
-				raise AttributeError(f'unsupported type: {obj.type}')
+				raise AttributeError(f'unsupported object type: {obj.type}')
 
 		return img
 
@@ -73,11 +77,12 @@ class ObjectType(TextChoices):
 
 
 class ObjectState:
-	def __init__(self, x, y, width, height):
+	def __init__(self, x, y, width, height, active=True):
 		self.x = x
 		self.y = y
 		self.width = width
 		self.height = height
+		self.active = active
 
 
 class ObjectModel(Model):
@@ -95,12 +100,13 @@ class ObjectModel(Model):
 	width = IntegerField(blank=True, null=True)
 	height = IntegerField(blank=True, null=True)
 	color = ColorField(default='#FFFFFF')
+	active = BooleanField(default=True)
 
 	def full_path(self):
 		return f'{BASE_DIR}/animations/{self.image}'
 
 	def stateIn(self, start, frame_id):
-		state = ObjectState(self.x_coord, self.y_coord, self.width, self.height)
+		state = ObjectState(self.x_coord, self.y_coord, self.width, self.height, self.active)
 		canvas_width = self.animation.width
 		canvas_height = self.animation.height
 
@@ -118,6 +124,12 @@ class ObjectModel(Model):
 						state.y = (canvas_height - dh) / 2
 						state.width = dw
 						state.height = dh
+					elif ani.type == AnimationType.ACTIVATE:
+						state.active = True
+					elif ani.type == AnimationType.DEACTIVATE:
+						state.active = False
+					else:
+						raise AttributeError(f'Unknown animation type: {ani.type}')
 
 		return state
 
@@ -136,6 +148,8 @@ class AnimationType(TextChoices):
 	UNKNOWN = 'UN', _('Unknown')
 	MOVE = 'MO', _('Move')
 	SCALE = 'SC', _('Scale')
+	ACTIVATE = 'AC', _('Activate')
+	DEACTIVATE = 'DE', _('Deactivate')
 
 
 class ObjectAnimationModel(Model):
