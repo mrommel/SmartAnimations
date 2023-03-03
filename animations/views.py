@@ -89,3 +89,11 @@ def export_animation_gif(request, animation_id):
 	os.remove(tmp_out)
 
 	return response
+
+
+def test3d(request):
+	template = loader.get_template('test3d.html')
+	context = {
+		'navi_home': 'active',
+	}
+	return HttpResponse(template.render(context, request))

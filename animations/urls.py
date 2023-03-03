@@ -11,4 +11,7 @@ urlpatterns = [
 
     # admin actions
     path('export/<str:animation_id>/gif', views.export_animation_gif, name='export_animation_gif'),
+
+    # test
+    path('test3d', views.test3d, name='test3d'),
 ]

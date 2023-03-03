@@ -33,3 +33,5 @@ python3 manage.py migrate
 * https://realpython.com/django-setup/
 * https://favicon.io/ (Marko One + #05A)
 * Template based on https://adminlte.io/themes/AdminLTE/index.html
+* 3D https://www.mediaevent.de/tutorial/canvas-webgl.html
+* https://threejs.org/examples/
