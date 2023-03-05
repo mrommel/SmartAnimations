@@ -35,3 +35,4 @@ python3 manage.py migrate
 * Template based on https://adminlte.io/themes/AdminLTE/index.html
 * 3D https://www.mediaevent.de/tutorial/canvas-webgl.html
 * https://threejs.org/examples/
+* https://github.com/saucecode/threejs-demos
