@@ -5,10 +5,17 @@
     <title>Test 3D</title>
 
     <style>
+        body {
+            overflow: hidden;
+            margin: 0px;
+        }
+
         #wrapper {
-            width: 60%;
-            margin: 0 auto;
-            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100px;
+            height: 50px;
         }
     </style>
 </head>
@@ -22,11 +29,18 @@
         </span>
     </div>
 
-    <!--<script type="text/javascript" src="{% static 'animations/js/three/three.min.js' %}" ></script>-->
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.150.1/three.min.js" ></script>
-    <!--<script type="module">
-        import Stats from "{% static 'animations/js/three/stats.module.js' %}";
-    </script>-->
+    <script async src="{% static 'animations/js/three/utils/es-module-shims.js' %}"></script>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "{% static 'animations/js/three/three.module.js' %}",
+                "three/examples/jsm/controls/OrbitControls": "{% static 'animations/js/three/jsm/controls/OrbitControls.js' %}",
+                "three/examples/jsm/libs/stats.module": "{% static 'animations/js/three/jsm/libs/stats.module.js' %}"
+            }
+        }
+    </script>
+
     <script type="module">
         import "{% static 'animations/js/three/demo.js' %}";
     </script>

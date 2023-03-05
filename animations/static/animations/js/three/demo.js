@@ -1,12 +1,27 @@
-import Stats from './stats.module.js';
+import * as THREE from 'three';
+import Stats from './jsm/libs/stats.module.js';
+import { OrbitControls } from './jsm/controls/OrbitControls.js'
+import { InteractionManager } from "./thirdparty/three.interactive.js";
+import * as TWEEN from "./thirdparty/tween.esm.js";
 
-var scene, camera, renderer, stats;
+var scene, camera, renderer, stats, controls, interactionManager;
 var meshFloor;
 
 var keyboard = {};
 var player = { height: 1.8, speed: 0.1, turnSpeed: Math.PI*0.01 };
 var USE_WIREFRAME = false;
-export var plane;
+var plane;
+
+var cx, cz;
+
+function createCube({ color, x, y }) {
+  const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+  const material = new THREE.MeshLambertMaterial({ color });
+  const cube = new THREE.Mesh(geometry, material);
+  cube.position.set(x, y, 0);
+
+  return cube;
+}
 
 function init() {
 	scene = new THREE.Scene();
@@ -24,11 +39,14 @@ function init() {
     );
     // camera.position.z = 12.0;
     camera.position.set(0, player.height, 12);
-	camera.lookAt(new THREE.Vector3(0,player.height,0));
+	camera.lookAt(new THREE.Vector3(cx, 0, cz));
 
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
+
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
 
 	// Texture Loading
 	var textureLoader = new THREE.TextureLoader();
@@ -57,6 +75,38 @@ function init() {
     stats = Stats();
     document.body.appendChild(stats.dom);
 
+    interactionManager = new InteractionManager(
+      renderer,
+      camera,
+      renderer.domElement
+    );
+
+    // objects
+    const cubes = {
+      pink: createCube({ color: 0xff00ce, x: -3, y: 0, z: 1 }),
+      purple: createCube({ color: 0x9300fb, x: 3, y: 0, z: 1 }),
+      blue: createCube({ color: 0x0065d9, x: 1, y: 0, z: 1 }),
+      cyan: createCube({ color: 0x00d7d0, x: -1, y: 0, z: 1 })
+    };
+
+    for (const [name, object] of Object.entries(cubes)) {
+        object.addEventListener("click", (event) => {
+            event.stopPropagation();
+            console.log(`${name} cube was clicked`);
+
+            const cube = event.target;
+            const coords = { x: camera.position.x, y: 5, z: camera.position.z };
+            new TWEEN.Tween(coords)
+                .to({ x: cube.position.x, y: 5, z: cube.position.z })
+                .onUpdate(() =>
+                    camera.position.set(coords.x, camera.position.y, coords.z)
+                )
+                .start();
+        });
+        interactionManager.add(object);
+        scene.add(object);
+    }
+
     animate();
 }
 
@@ -67,7 +117,7 @@ function onWindowResize() {
     animate();
 }
 
-function animate() {
+function animate(time) {
 	requestAnimationFrame(animate);
 	
 	// mesh.rotation.x += 0.01;
@@ -75,12 +125,15 @@ function animate() {
 	
 	// Keyboard movement inputs
 	if(keyboard[87]){ // W key
-		camera.position.x -= Math.sin(camera.rotation.y) * player.speed;
-		camera.position.z -= -Math.cos(camera.rotation.y) * player.speed;
+		// camera.position.x -= Math.sin(camera.rotation.y) * player.speed;
+		// camera.position.z -= -Math.cos(camera.rotation.y) * player.speed;
+		cx -= player.speed * 10;
+		// cz -= player.speed;
 	}
 	if(keyboard[83]){ // S key
-		camera.position.x += Math.sin(camera.rotation.y) * player.speed;
-		camera.position.z += -Math.cos(camera.rotation.y) * player.speed;
+		// camera.position.x += Math.sin(camera.rotation.y) * player.speed;
+		// camera.position.z += -Math.cos(camera.rotation.y) * player.speed;
+		cx += player.speed * 10;
 	}
 	if(keyboard[65]){ // A key
 		// Redirect motion by 90 degrees
@@ -99,8 +152,16 @@ function animate() {
 	if(keyboard[39]){ // right arrow key
 		camera.rotation.y += player.turnSpeed;
 	}
+
+	// camera.lookAt(new THREE.Vector3(cx, 0, cz));
+
+	controls.update();
 	
 	renderer.render(scene, camera);
+
+	interactionManager.update();
+    TWEEN.update(time);
+
 	stats.update();
 }
 
