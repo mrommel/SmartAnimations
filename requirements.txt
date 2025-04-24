@@ -1,9 +1,16 @@
-Django==4.1.13
-pillow
+Django==4.2.11
 django-colorfield==0.8.0
 django-crispy-forms==1.14.0
+django-enumfield==3.1
 imageio==2.25.0
+pillow==10.3.0
+pip==24.0
+libsass==0.23.0
+django-compressor==4.4
+django-sass-processor==1.4
 
+# testing / code formatting
+black==24.4.2
 pylint==2.15.10
 pytest==7.2.1
 pytest-django==4.5.2
