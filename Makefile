@@ -15,6 +15,9 @@ pylint: venv
 	# --disable=C0303,R0903,R0915,C0103,E1101,E0102,R0913,W0123,R0912,R0801 simulation map population
 	./$(VENV)/bin/pylint smartanimations
 
+create_scenes_app: venv
+	./$(VENV)/bin/python3 manage.py startapp scenes
+
 # tests: venv
 #	./$(VENV)/bin/python3 -m unittest
 
@@ -31,6 +34,7 @@ clean:
 makemigrations: venv
 	./$(VENV)/bin/python3 manage.py makemigrations
 	./$(VENV)/bin/python3 manage.py sqlmigrate animations 0003  # change this
+	./$(VENV)/bin/python3 manage.py sqlmigrate scenes 0001  # change this
 	./$(VENV)/bin/python3 manage.py migrate
 
 migrate: venv
@@ -39,6 +43,12 @@ migrate: venv
 createsuperuser: venv
 	./$(VENV)/bin/python3 manage.py createsuperuser
 
+black-check:
+	./$(VENV)/bin/python3 -m black --check setup scenes animations
+
+black:
+	./$(VENV)/bin/python3 -m black setup scenes animations
+
 
 # make sure that all targets are used/evaluated even if a file with same name exists
-.PHONY: all venv run clean tests
+.PHONY: all venv run clean tests black-check

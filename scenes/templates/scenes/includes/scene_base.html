@@ -1,0 +1,129 @@
+<!doctype html>{% load static %}
+<html lang="en">
+<head>
+    <title>{{ title }}</title>
+    <meta charset="utf-8"/>
+    <meta name="description" content="{{ description }}"/>
+    <meta name="keywords" content="{{ keywords }}"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="{{ title }}" />
+    <meta property="og:site_name" content="SmartAnimantions by MiRo" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'scenes/img/icons/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'scenes/img/icons/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'scenes/img/icons/favicon-16x16.png' %}">
+    <link rel="manifest" href="{% static 'scenes/img/icons/site.webmanifest' %}">
+
+    <!-- Custom styles for this template -->
+    <!--<link href="{% static 'scenes/css/modern.css' %}" rel="stylesheet">-->
+    {% load sass_tags %}
+    <link href="{% sass_src 'bootstrap.scss' %}" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div class="splash {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        <div class="splash-icon"></div>
+    </div>
+
+    <div class="wrapper">
+        <nav class="sidebar" id="sidebar">
+            <a class="sidebar-brand" href="#">
+                <span class="logo-lg"><b>Animation</b>Studio</span>
+            </a>
+
+            <div class="sidebar-content">
+                <div class="sidebar-user">
+                    <img src="{% static 'scenes/img/scene_64.png' %}" class="img-fluid rounded-circle mb-2" alt="Animations">
+                    <div class="fw-bold"><b>Animation</b>Studio</div>
+                    <small></small>
+                </div>
+
+                <ul class="sidebar-nav">
+
+                    <li class="sidebar-header">
+						Main
+					</li>
+
+                    <li class="sidebar-item">
+                        <a class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+                            <i class="align-middle me-2 fas fa-fw fa-home"></i> <span class="align-middle">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link {% if request.resolver_match.url_name == 'list_scenes' %}active{% endif %}" href="{% url 'list_scenes' %}">
+                            <i class="align-middle me-2 fas fa-fw fa-list"></i> <span class="align-middle">Scenes</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-header">
+						Tooling
+					</li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="/admin" target="_blank">
+                            <i class="align-middle me-2 fas fa-fw fa-list"></i> <span class="align-middle">Admin</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="main">
+            <nav class="navbar navbar-expand navbar-theme">
+                <!--<input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">-->
+                <ul class="navbar-nav px-3">
+                    <li class="nav-item text-nowrap">
+                        <a class="nav-link" href="#">Sign out</a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Begin page content -->
+            <main class="content">
+                <div class="container-fluid">
+                    {% block content %}
+                    main
+                    {% endblock %}
+                </div>
+            </main>
+
+            <footer class="footer">
+                <div class="container-fluid">
+                    <div class="row text-muted">
+                        <div class="col-8 text-start">
+                            <ul class="list-inline">
+                                <li class="list-inline-item">
+                                    <a class="text-muted" href="#">Support</a>
+                                </li>
+                                <li class="list-inline-item">
+                                    <a class="text-muted" href="#">Privacy</a>
+                                </li>
+                                <li class="list-inline-item">
+                                    <a class="text-muted" href="#">Terms of Service</a>
+                                </li>
+                                <li class="list-inline-item">
+                                    <a class="text-muted" href="#">Contact</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-4 text-end">
+                            <p class="mb-0">
+                                © 2024 - <a class="text-muted" href="{% url 'dashboard' %}">Spark</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'scenes/js/app.js' %}"></script>
+
+    {% block scripts %}
+    {% endblock scripts %}
+</body>
+</html>

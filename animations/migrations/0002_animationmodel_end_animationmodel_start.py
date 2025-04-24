@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('animations', '0001_initial'),
+        ("animations", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='animationmodel',
-            name='end',
+            model_name="animationmodel",
+            name="end",
             field=models.IntegerField(default=1),
         ),
         migrations.AddField(
-            model_name='animationmodel',
-            name='start',
+            model_name="animationmodel",
+            name="start",
             field=models.IntegerField(default=0),
         ),
     ]

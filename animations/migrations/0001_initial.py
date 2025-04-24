@@ -9,54 +9,131 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='AnimationModel',
+            name="AnimationModel",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(help_text='Enter a name of the animation', max_length=100)),
-                ('width', models.IntegerField()),
-                ('height', models.IntegerField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        help_text="Enter a name of the animation", max_length=100
+                    ),
+                ),
+                ("width", models.IntegerField()),
+                ("height", models.IntegerField()),
             ],
         ),
         migrations.CreateModel(
-            name='ObjectModel',
+            name="ObjectModel",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(help_text='Enter a name of the object', max_length=100)),
-                ('type', models.CharField(choices=[('UN', 'Unknown'), ('IM', 'Image'), ('RE', 'Rectangle')], default='UN', max_length=2)),
-                ('zindex', models.IntegerField(default=0)),
-                ('image', models.ImageField(blank=True, null=True, upload_to='media/objects')),
-                ('x_coord', models.IntegerField(blank=True, null=True)),
-                ('y_coord', models.IntegerField(blank=True, null=True)),
-                ('width', models.IntegerField(blank=True, null=True)),
-                ('height', models.IntegerField(blank=True, null=True)),
-                ('color', colorfield.fields.ColorField(default='#FFFFFF', image_field=None, max_length=18, samples=None)),
-                ('animation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='animations.animationmodel')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        help_text="Enter a name of the object", max_length=100
+                    ),
+                ),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("UN", "Unknown"),
+                            ("IM", "Image"),
+                            ("RE", "Rectangle"),
+                        ],
+                        default="UN",
+                        max_length=2,
+                    ),
+                ),
+                ("zindex", models.IntegerField(default=0)),
+                (
+                    "image",
+                    models.ImageField(blank=True, null=True, upload_to="media/objects"),
+                ),
+                ("x_coord", models.IntegerField(blank=True, null=True)),
+                ("y_coord", models.IntegerField(blank=True, null=True)),
+                ("width", models.IntegerField(blank=True, null=True)),
+                ("height", models.IntegerField(blank=True, null=True)),
+                (
+                    "color",
+                    colorfield.fields.ColorField(
+                        default="#FFFFFF", image_field=None, max_length=18, samples=None
+                    ),
+                ),
+                (
+                    "animation",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="animations.animationmodel",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ObjectAnimationModel',
+            name="ObjectAnimationModel",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.CharField(choices=[('UN', 'Unknown'), ('MO', 'Move'), ('SC', 'Scale')], default='UN', max_length=2)),
-                ('start', models.IntegerField(default=0)),
-                ('end', models.IntegerField(default=1)),
-                ('dx', models.IntegerField(default=0)),
-                ('dy', models.IntegerField(default=0)),
-                ('scale', models.FloatField(default=1)),
-                ('object', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='animations.objectmodel')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[("UN", "Unknown"), ("MO", "Move"), ("SC", "Scale")],
+                        default="UN",
+                        max_length=2,
+                    ),
+                ),
+                ("start", models.IntegerField(default=0)),
+                ("end", models.IntegerField(default=1)),
+                ("dx", models.IntegerField(default=0)),
+                ("dy", models.IntegerField(default=0)),
+                ("scale", models.FloatField(default=1)),
+                (
+                    "object",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="animations.objectmodel",
+                    ),
+                ),
             ],
         ),
         migrations.AddConstraint(
-            model_name='objectmodel',
-            constraint=models.CheckConstraint(check=models.Q(('type__in', ['UN', 'IM', 'RE'])), name='valid_objcet_type'),
+            model_name="objectmodel",
+            constraint=models.CheckConstraint(
+                check=models.Q(("type__in", ["UN", "IM", "RE"])),
+                name="valid_objcet_type",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='objectanimationmodel',
-            constraint=models.CheckConstraint(check=models.Q(('type__in', ['UN', 'MO', 'SC'])), name='valid_animation_type'),
+            model_name="objectanimationmodel",
+            constraint=models.CheckConstraint(
+                check=models.Q(("type__in", ["UN", "MO", "SC"])),
+                name="valid_animation_type",
+            ),
         ),
     ]

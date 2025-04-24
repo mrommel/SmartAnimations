@@ -1,0 +1,83 @@
+{% extends "scenes/includes/scene_base.html" %}
+
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="header">
+    <h1 class="header-title">
+        Scenes
+    </h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'list_scenes' %}">Scenes</a></li>
+            <li class="breadcrumb-item"><a href="#">Detail</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ scene.name }}</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-12 col-xl-9">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Scene</h5>
+                <h6 class="card-subtitle text-muted">Name: {{ scene.name }}</h6>
+            </div>
+
+            <div class="card-body">
+                <iframe src="{% url 'detail_iframe' scene.id %}" style="border:none;" title="Iframe" width="800" height="600"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-3 col-xl-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Properties</h5>
+                <h6 class="card-subtitle text-muted">...</h6>
+            </div>
+
+            <div class="card-body">
+                <form method="POST" id="properties-form">
+                    {% crispy scene_camera_form %}
+                    <div class="text-end mt-3">
+                        <button type="submit" class="btn btn-lg btn-primary">Save</button>
+                    </div>
+                </form>
+
+                <div id="alert" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+
+<script>
+    // Submit post on submit
+    $('#properties-form').on('submit', function(event) {
+        event.preventDefault();
+        console.log("submit properties form")  // sanity check
+
+        $.ajax({
+            url: '{% url "detail_scene" scene.id %}',  // @todo: change url
+            type: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    $('#alert').html('<div class="alert alert-success">Updated properties!</div>').show();
+
+                    // @todo: update iframe
+                } else {
+                    $('#alert').html('<div class="alert alert-danger">' + response.errors + '</div>').show();
+                }
+            }
+        });
+    });
+</script>
+
+{% endblock scripts %}

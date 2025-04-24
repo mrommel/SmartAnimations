@@ -15,38 +15,116 @@ var plane;
 var cx, cz;
 
 function createCube({ color, x, y }) {
-  const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-  const material = new THREE.MeshLambertMaterial({ color });
-  const cube = new THREE.Mesh(geometry, material);
-  cube.position.set(x, y, 0);
+    const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+    const material = new THREE.MeshLambertMaterial({ color });
+    const cube = new THREE.Mesh(geometry, material);
+    cube.position.set(x, y, 0);
 
-  return cube;
+    return cube;
+}
+
+const capture = () => {
+    const canvas = document.querySelector('#container canvas');
+    if (canvas) {
+        const base64 = canvas.toDataURL('img/png');
+        // document.querySelector('#img').src = base64;
+        // console.log('write image to server');
+    } else {
+        console.log('cannot find canvas');
+    }
+};
+
+const container = document.getElementById('container');
+
+var cameraParams = {
+    near: 0.1,
+    far: 1000.0,
+    fov: 90,                    // degrees?!
+    aspectRatio: window.innerWidth / window.innerHeight,       // from the dimensions of the canvas. see CSS
+    atX: 0,
+    atY: 1.8,
+    atZ: 12,
+    eyeX: 0,  // cx
+    eyeY: 0,
+    eyeZ: 25,  // cz
+    upX: 0,
+    upY: 1,
+    upZ: 0
+};
+
+// global, so we can modify it from the GUI
+var camera = new THREE.PerspectiveCamera();
+
+// globals, modified from the above
+var at  = new THREE.Vector3();  // lookAt
+var eye = new THREE.Vector3();
+var up  = new THREE.Vector3();
+
+function setCameraView() {
+    at.set(cameraParams.atX, cameraParams.atY, cameraParams.atZ);
+    eye.set(cameraParams.eyeX, cameraParams.eyeY, cameraParams.eyeZ);
+    up.set(cameraParams.upX, cameraParams.upY, cameraParams.upZ);
+}
+setCameraView();
+
+function setupCamera(scene) {
+    // camera shape
+    var fov    = cameraParams.fov || 90;  // in degrees
+    var aspect = cameraParams.aspectRatio || window.innerWidth / window.innerHeight;  // canvas width/height
+    var near   = cameraParams.near || 0.1;  // measured from eye
+    var far    = cameraParams.far  || 1000.0;  // measured from eye
+    camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+    // camera location
+    setCameraView();
+    camera.position.copy(eye);
+    // Cameras inherit an "up" vector from Object3D.
+    camera.up.copy(up);
+    camera.lookAt(at);
+    return camera;
+}
+
+function adjustCamera() {
+    // the following are for the camera shape
+    camera.fov    = cameraParams.fov;
+    camera.aspect = cameraParams.aspectRatio;
+    camera.near   = cameraParams.near;
+    camera.far    = cameraParams.far;
+    // to account for the settings above
+    camera.updateProjectionMatrix();
+    // camera location
+    camera.position.copy(eye);
+    camera.up.copy(up);  // Cameras inherit an "up" vector from Object3D.
+    camera.lookAt(at);
 }
 
 function init() {
 	scene = new THREE.Scene();
-    // scene.add(new THREE.AxesHelper(5));
+    scene.add(new THREE.AxesHelper(5));  // shows the axis cross
+    setupCamera(scene);
 
     const light = new THREE.PointLight(0xffffff, 2);
     light.position.set(0, 5, 10);
     scene.add(light);
 
-    camera = new THREE.PerspectiveCamera(
-        90,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        1000
-    );
-    // camera.position.z = 12.0;
-    camera.position.set(0, player.height, 12);
-	camera.lookAt(new THREE.Vector3(cx, 0, cz));
-
-    renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        preserveDrawingBuffer: true,
+    });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+    container.appendChild(renderer.domElement);
 
     controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
+    // controls.enableDamping = true;
+
+    controls.addEventListener("change", event => {
+        cameraParams.atX = controls.target.x;
+        cameraParams.atY = controls.target.y;
+        cameraParams.atZ = controls.target.z;
+        cameraParams.eyeX = controls.object.position.x;
+        cameraParams.eyeY = controls.object.position.y;
+        cameraParams.eyeZ = controls.object.position.z;
+        setCameraView();
+    });
 
 	// Texture Loading
 	var textureLoader = new THREE.TextureLoader();
@@ -76,17 +154,17 @@ function init() {
     document.body.appendChild(stats.dom);
 
     interactionManager = new InteractionManager(
-      renderer,
-      camera,
-      renderer.domElement
+        renderer,
+        camera,
+        renderer.domElement
     );
 
     // objects
     const cubes = {
-      pink: createCube({ color: 0xff00ce, x: -3, y: 0, z: 1 }),
-      purple: createCube({ color: 0x9300fb, x: 3, y: 0, z: 1 }),
-      blue: createCube({ color: 0x0065d9, x: 1, y: 0, z: 1 }),
-      cyan: createCube({ color: 0x00d7d0, x: -1, y: 0, z: 1 })
+        pink: createCube({ color: 0xff00ce, x: -3, y: 0, z: 1 }),
+        purple: createCube({ color: 0x9300fb, x: 3, y: 0, z: 1 }),
+        blue: createCube({ color: 0x0065d9, x: 1, y: 0, z: 1 }),
+        cyan: createCube({ color: 0x00d7d0, x: -1, y: 0, z: 1 })
     };
 
     for (const [name, object] of Object.entries(cubes)) {
@@ -107,11 +185,22 @@ function init() {
         scene.add(object);
     }
 
+    var gui = new dat.GUI();
+    gui.add(cameraParams, 'fov', 1, 179).onChange(onCameraParamsChange).listen();
+    gui.add(cameraParams, 'eyeX', 1, 179).onChange(onCameraParamsChange).listen();
+    gui.add(cameraParams, 'eyeY', 1, 179).onChange(onCameraParamsChange).listen();
+    gui.add(cameraParams, 'eyeZ', 1, 179).onChange(onCameraParamsChange).listen();
+
     animate();
 }
 
+function onCameraParamsChange() {
+    setCameraView();
+    adjustCamera();
+}
+
 function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.aspect = window.innerWidth / window.innerHeight;  // fixme
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
     animate();
@@ -120,44 +209,41 @@ function onWindowResize() {
 function animate(time) {
 	requestAnimationFrame(animate);
 	
-	// mesh.rotation.x += 0.01;
-	// mesh.rotation.y += 0.02;
-	
 	// Keyboard movement inputs
-	if(keyboard[87]){ // W key
-		// camera.position.x -= Math.sin(camera.rotation.y) * player.speed;
-		// camera.position.z -= -Math.cos(camera.rotation.y) * player.speed;
-		cx -= player.speed * 10;
-		// cz -= player.speed;
+	if(keyboard[87]) { // F key
+		cameraParams.atX -= player.speed * 10;
+		onCameraParamsChange();
 	}
-	if(keyboard[83]){ // S key
-		// camera.position.x += Math.sin(camera.rotation.y) * player.speed;
-		// camera.position.z += -Math.cos(camera.rotation.y) * player.speed;
-		cx += player.speed * 10;
+	if(keyboard[83]) { // S key
+		cameraParams.atX += player.speed * 10;
+		onCameraParamsChange();
 	}
-	if(keyboard[65]){ // A key
-		// Redirect motion by 90 degrees
-		camera.position.x += Math.sin(camera.rotation.y + Math.PI/2) * player.speed;
-		camera.position.z += -Math.cos(camera.rotation.y + Math.PI/2) * player.speed;
+	if(keyboard[65]) { // A key
+		cameraParams.eyeX += Math.sin(camera.rotation.y + Math.PI/2) * player.speed;
+		cameraParams.eyeZ += -Math.cos(camera.rotation.y + Math.PI/2) * player.speed;
+		onCameraParamsChange();
 	}
-	if(keyboard[68]){ // D key
-		camera.position.x += Math.sin(camera.rotation.y - Math.PI/2) * player.speed;
-		camera.position.z += -Math.cos(camera.rotation.y - Math.PI/2) * player.speed;
+	if(keyboard[68]) { // D key
+		cameraParams.eyeX += Math.sin(camera.rotation.y - Math.PI/2) * player.speed;
+		cameraParams.eyeZ += -Math.cos(camera.rotation.y - Math.PI/2) * player.speed;
+		onCameraParamsChange();
 	}
 	
 	// Keyboard turn inputs
-	if(keyboard[37]){ // left arrow key
+	if(keyboard[37]) { // left arrow key
 		camera.rotation.y -= player.turnSpeed;
+		onCameraParamsChange();
 	}
-	if(keyboard[39]){ // right arrow key
+	if(keyboard[39]) { // right arrow key
 		camera.rotation.y += player.turnSpeed;
+		onCameraParamsChange();
 	}
-
-	// camera.lookAt(new THREE.Vector3(cx, 0, cz));
 
 	controls.update();
 	
 	renderer.render(scene, camera);
+
+	capture();
 
 	interactionManager.update();
     TWEEN.update(time);

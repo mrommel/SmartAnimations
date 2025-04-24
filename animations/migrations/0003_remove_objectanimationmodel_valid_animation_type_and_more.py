@@ -6,26 +6,39 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('animations', '0002_animationmodel_end_animationmodel_start'),
+        ("animations", "0002_animationmodel_end_animationmodel_start"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='objectanimationmodel',
-            name='valid_animation_type',
+            model_name="objectanimationmodel",
+            name="valid_animation_type",
         ),
         migrations.AddField(
-            model_name='objectmodel',
-            name='active',
+            model_name="objectmodel",
+            name="active",
             field=models.BooleanField(default=True),
         ),
         migrations.AlterField(
-            model_name='objectanimationmodel',
-            name='type',
-            field=models.CharField(choices=[('UN', 'Unknown'), ('MO', 'Move'), ('SC', 'Scale'), ('AC', 'Activate'), ('DE', 'Deactivate')], default='UN', max_length=2),
+            model_name="objectanimationmodel",
+            name="type",
+            field=models.CharField(
+                choices=[
+                    ("UN", "Unknown"),
+                    ("MO", "Move"),
+                    ("SC", "Scale"),
+                    ("AC", "Activate"),
+                    ("DE", "Deactivate"),
+                ],
+                default="UN",
+                max_length=2,
+            ),
         ),
         migrations.AddConstraint(
-            model_name='objectanimationmodel',
-            constraint=models.CheckConstraint(check=models.Q(('type__in', ['UN', 'MO', 'SC', 'AC', 'DE'])), name='valid_animation_type'),
+            model_name="objectanimationmodel",
+            constraint=models.CheckConstraint(
+                check=models.Q(("type__in", ["UN", "MO", "SC", "AC", "DE"])),
+                name="valid_animation_type",
+            ),
         ),
     ]

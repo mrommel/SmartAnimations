@@ -1,0 +1,60 @@
+{% extends "scenes/includes/scene_base.html" %}
+
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<div class="header">
+    <h1 class="header-title">
+        Scenes
+    </h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'list_scenes' %}">Scenes</a></li>
+            <li class="breadcrumb-item"><a href="#">List</a></li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-9 col-xl-9">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Scenes</h5>
+                <h6 class="card-subtitle text-muted">Found {{ num_scenes }} scenes</h6>
+            </div>
+
+            <div class="card-body">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for scene in scenes %}
+                        <tr>
+                            <td><a href="{% url 'detail_scene' scene.id %}">{{ scene.name }}</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-3 col-xl-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Scene</h5>
+                <h6 class="card-subtitle text-muted">Create a new Scene</h6>
+            </div>
+
+            <div class="card-body">
+                <a href="{% url 'add_scene' %}">Add</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
